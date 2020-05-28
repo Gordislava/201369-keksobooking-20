@@ -1,7 +1,7 @@
-# Личный проект «Кексобукинг» [![Build status][travis-image]][travis-url]
+﻿# Личный проект «Кексобукинг» [![Build status][travis-image]][travis-url]
 
 * Студент: [Ярослава Пономарева](https://up.htmlacademy.ru/javascript/20/user/201369).
-* Наставник: `Неизвестно`.
+* Наставник: Роман Марченко.
 
 ---
 
