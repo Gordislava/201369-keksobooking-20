@@ -1,5 +1,59 @@
 'use strict';
 // eslint-disable-next-line strict
+var AMOUNT_ITEMS = 8;
+var PIN_WIDTN = 50;
+var PIN_HEIGHT = 70;
+var REGISTRATION_TIME = ['12:00', '13:00', '14:00'];
+var TITLES = [
+  'Выгодное предложение',
+  'Только для состоятельных путешественников',
+  'Идеально для пар',
+  '5 звезд за локацию',
+  'Бюджетно. Сурово. Доступно',
+  'Hello Kitti на всех поверхностях. Только для фанатов!',
+  'Это так дорого, что можешь даже не смотреть',
+  'Деловой центр, 5 минут до достопримечательностей'
+];
+var DESCRIPTIONS = [
+  'Хороший вариант для путешественников',
+  'Пять звезд от бизнесменов со всего мира',
+  'Спартанские условия, кружку для чая везите с собой. Зато дешево',
+  'Атмосферно и няшно',
+  'Роскошные хоромы для тех, кто хочет почувствовать себя императором',
+  'Простой вариант без претензий, но в центре Токио',
+  'Идеальное место для ценителей сезона цветения сакуры',
+  'Последний вариант и у меня кончилась фантазия'
+];
+var PHOTOS = ['http://o0.github.io/assets/images/tokyo/hotel1.jpg', 'http://o0.github.io/assets/images/tokyo/hotel2.jpg', 'http://o0.github.io/assets/images/tokyo/hotel3.jpg'];
+var TYPES = ['palace', 'flat', 'house', 'bungalo'];
+var FEATURES = ['wifi', 'dishwasher', 'parking', 'washer', 'elevator', 'conditioner'];
+var priceLimits = {
+  MIN: 1,
+  MAX: 1000
+};
+var roomLimits = {
+  MIN: 1,
+  MAX: 10
+};
+var guestLimits = {
+  MIN: 1,
+  MAX: 30
+};
+var locationLimitsY = {
+  MIN: 130,
+  MAX: 630
+};
+
+var mapPins = document.querySelector('.map__pins');
+
+var locationLimitsX = {
+  MIN: 0,
+  MAX: mapPins.offsetWidth
+};
+
+var map = document.querySelector('.map');
+map.classList.remove('map--faded');
+var templatePin = document.querySelector('#pin').content.querySelector('.map__pin');
 
 var getRandomInt = function (min, max) {
   min = Math.ceil(min);
@@ -7,107 +61,97 @@ var getRandomInt = function (min, max) {
   return Math.floor(Math.random() * (max - min + 1)) + min;
 };
 
-
-var avatars = [
-  'img/avatars/user01.png',
-  'img/avatars/user02.png',
-  'img/avatars/user03.png',
-  'img/avatars/user04.png',
-  'img/avatars/user05.png',
-  'img/avatars/user06.png',
-  'img/avatars/user07.png',
-  'img/avatars/user08.png'
-];
-
-var avatarValue = Math.floor(Math.random() * avatars.length);
-
-var price = {
-  min: 1,
-  max: 1000
+var getRandomValue = function (array) {
+  var randomArrayValue = Math.floor(Math.random() * array.length);
+  return array[randomArrayValue];
 };
 
-var rooms = {
-  min: 1,
-  max: 10
+var createRandomArray = function (array) {
+  var randomArray = [];
+  var j = 0;
+  for (var i = 0; i < array.length; i++) {
+    if (getRandomInt(0, 1)) {
+      randomArray[j] = array[i];
+      j++;
+    }
+  }
+  return randomArray;
 };
 
-var guests = {
-  min: 1,
-  max: 30
+// create array of avatars
+var createAvatarsArray = function () {
+  var avatars = [];
+  for (var i = 0; i < AMOUNT_ITEMS; i++) {
+    avatars[i] = 'img/avatars/user0' + (i + 1) + '.png';
+  }
+  return avatars;
 };
 
-var time = ['12:00', '13:00', '14:00'];
+var avatars = createAvatarsArray(AMOUNT_ITEMS);
 
-var currentTime = Math.floor(Math.random() * time.length);
-var currentTimeOut = Math.floor(Math.random() * time.length);
-
-
-var mapPins = document.querySelector('.map__pins');
-
-var locationY = {
-  min: 130,
-  max: 630
-};
-
-var locationX = {
-  min: 0,
-  max: mapPins.offsetWidth
-};
-
-// eslint-disable-next-line no-unused-vars
-function createItem() {
-
+// create one item
+var createItem = function () {
+  var coordinateX = getRandomInt(locationLimitsX.MIN, locationLimitsX.MAX);
+  var coordinateY = getRandomInt(locationLimitsY.MIN, locationLimitsY.MAX);
   var item = {
     'author': {
-      'avatar': avatars[Math.floor(Math.random() * avatars.length)],
+      'avatar': avatars.splice((getRandomInt(0, (avatars.length - 1))), 1),
+
     },
     'offer': {
-      'title': 1,
-      'address': 1,
-      'price': getRandomInt(price.min, price.max),
-      'type': 1,
-      'rooms': getRandomInt(rooms.min, rooms.max),
-      'guests': getRandomInt(guests.min, guests.max),
-      'checkin': time[Math.floor(Math.random() * time.length)],
-      'checkout': time[Math.floor(Math.random() * time.length)],
-      'features': 1,
-      'description': 1,
-      'photos': 1
+      'title': getRandomValue(TITLES),
+      'address': coordinateX + ',' + coordinateY,
+      'price': getRandomInt(priceLimits.MIN, priceLimits.MAX),
+      'type': getRandomValue(TYPES),
+      'rooms': getRandomInt(roomLimits.MIN, roomLimits.MAX),
+      'guests': getRandomInt(guestLimits.MIN, guestLimits.MAX),
+      'checkin': getRandomValue(REGISTRATION_TIME),
+      'checkout': getRandomValue(REGISTRATION_TIME),
+      'features': createRandomArray(FEATURES),
+      'description': getRandomValue(DESCRIPTIONS),
+      'photos': createRandomArray(PHOTOS)
     },
     'location': {
-      x: getRandomInt(locationX.min, locationX.max),
-      y: getRandomInt(locationY.min, locationY.max),
+      x: coordinateX,
+      y: coordinateY,
     }
   };
 
   return item;
 };
 
-// create array
-function createItemsArray(amountItem) {
+// create array of items
+var createItemsArray = function () {
   var items = [];
-  for (var i = 0; i < amountItem; i++) {
+  for (var i = 0; i < AMOUNT_ITEMS; i++) {
     items[i] = createItem();
   }
   return items;
-}
+};
 
-var items = createItemsArray(8);
+var items = createItemsArray(AMOUNT_ITEMS);
 
+// вставка через шаблон
+var createPins = function () {
+  var pins = [];
+  for (var i = 0; i < items.length; i++) {
+    pins[i] = templatePin.cloneNode(true);
+  }
+  return pins;
+};
 
-// тест вставки через шаблон
-// убираем класс у .map
-var map = document.querySelector('.map');
-map.classList.remove('map--faded');
+var pins = createPins();
 
-var templatePin = document.querySelector('#pin').content.querySelector('.map__pin');
+var renderPins = function () {
+  for (var i = 0; i < pins.length; i++) {
+    var pin = pins[i];
+    pin.style.left = items[i].location.x - PIN_WIDTN / 2 + 'px';
+    pin.style.top = items[i].location.y - PIN_HEIGHT + 'px';
+    pin.querySelector('img').src = items[i].author.avatar;
+    pin.querySelector('img').alt = items[i].offer.title;
+    mapPins.appendChild(pin);
+  }
+  return pin;
+};
 
-for (var i = 0; i < items.length; i++) {
-  var element = templatePin.cloneNode(true);
-  templatePin.style.left = items[i].location.x + 'px';
-  templatePin.style.top = items[i].location.y + 'px';
-  element.querySelector('img').src = items[i].author.avatar;
-  mapPins.appendChild(element);
-}
-
-
+renderPins();
