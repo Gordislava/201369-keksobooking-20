@@ -22,10 +22,26 @@ var DESCRIPTIONS = [
   'Роскошные хоромы для тех, кто хочет почувствовать себя императором',
   'Простой вариант без претензий, но в центре Токио',
   'Идеальное место для ценителей сезона цветения сакуры',
-  'Последний вариант и у меня кончилась фантазия'
+  'Чулан в офисе аниме-студии. Творческая тусовка - есть. Света, воды и покоя - нет'
 ];
-var PHOTOS = ['http://o0.github.io/assets/images/tokyo/hotel1.jpg', 'http://o0.github.io/assets/images/tokyo/hotel2.jpg', 'http://o0.github.io/assets/images/tokyo/hotel3.jpg'];
-var TYPES = ['palace', 'flat', 'house', 'bungalo'];
+var PHOTOS = [
+  'http://o0.github.io/assets/images/tokyo/hotel1.jpg',
+  'http://o0.github.io/assets/images/tokyo/hotel2.jpg',
+  'http://o0.github.io/assets/images/tokyo/hotel3.jpg'
+];
+var TYPES = [
+  'palace',
+  'flat',
+  'house',
+  'bungalo'
+];
+var TYPES_VALUE = [
+  'Дворец',
+  'Квартира',
+  'Дом',
+  'Бунгало'
+];
+
 var FEATURES = ['wifi', 'dishwasher', 'parking', 'washer', 'elevator', 'conditioner'];
 var priceLimits = {
   MIN: 1,
@@ -54,6 +70,8 @@ var locationLimitsX = {
 var map = document.querySelector('.map');
 map.classList.remove('map--faded');
 var templatePin = document.querySelector('#pin').content.querySelector('.map__pin');
+var templateCard = document.querySelector('#card').content.querySelector('.map__card');
+var siblingMapElement = document.querySelector('.map__filters-container');
 
 var getRandomInt = function (min, max) {
   min = Math.ceil(min);
@@ -100,7 +118,7 @@ var createItem = function () {
     },
     'offer': {
       'title': getRandomValue(TITLES),
-      'address': coordinateX + ',' + coordinateY,
+      'address': coordinateX + ', ' + coordinateY,
       'price': getRandomInt(priceLimits.MIN, priceLimits.MAX),
       'type': getRandomValue(TYPES),
       'rooms': getRandomInt(roomLimits.MIN, roomLimits.MAX),
@@ -155,3 +173,94 @@ var renderPins = function () {
 };
 
 renderPins();
+
+
+// создание шаблона для фотографии
+
+var createPhotoTemplate = function (src) {
+  var photoTemplate = document.createElement('img');
+  photoTemplate.src = src;
+  photoTemplate.alt = 'Фотография жилья';
+  photoTemplate.style.width = 45 + 'px';
+  photoTemplate.style.height = 40 + 'px';
+  photoTemplate.classList.add('popup__photo');
+
+  return photoTemplate;
+};
+
+
+// создание списка фотографий
+
+var fillPhotoList = function (container, array) {
+  container.innerHTML = '';
+  if (array.length > 0) {
+    for (var i = 0; i < array.length; i++) {
+      var containerChild = createPhotoTemplate(array[i]);
+      container.appendChild(containerChild);
+    }
+  } else {
+    container.remove();
+  }
+
+  return (containerChild);
+};
+
+// перевод значение Тип в нужный вид
+
+var fillTypeString = function (element, indexArray, valueArray) {
+  return (valueArray[indexArray.indexOf(element)]);
+};
+
+
+// создание списка фич
+
+var fillFeaturesList = function (container, array) {
+  container.innerHTML = '';
+  for (var i = 0; i < array.length; i++) {
+    var element = document.createElement('li');
+    element.classList.add('popup__feature');
+    element.classList.add('popup__feature--' + array[i]);
+    element.textContent = array[i];
+    container.appendChild(element);
+  }
+  return container;
+};
+
+// наполнение карточки информацией
+
+var fillCard = function (cardItem) {
+  var singleCard = templateCard.cloneNode(true);
+  var cardAvatar = singleCard.querySelector('.popup__avatar');
+  var cardTitle = singleCard.querySelector('.popup__title');
+  var cardAddress = singleCard.querySelector('.popup__text--address');
+  var cardPrice = singleCard.querySelector('.popup__text--price');
+  var cardType = singleCard.querySelector('.popup__type');
+  var cardCapacity = singleCard.querySelector('.popup__text--capacity');
+  var cardTime = singleCard.querySelector('.popup__text--time');
+  var cardDescription = singleCard.querySelector('.popup__description');
+  var cardFeatures = singleCard.querySelector('.popup__features');
+  var cardPhotos = singleCard.querySelector('.popup__photos');
+
+  cardAvatar.src = cardItem.author.avatar;
+  cardTitle.textContent = cardItem.offer.title;
+  cardAddress.textContent = cardItem.offer.address;
+  cardPrice.textContent = cardItem.offer.price + ' ₽' + ' /ночь';
+  cardType.textContent = fillTypeString(cardItem.offer.type, TYPES, TYPES_VALUE);
+  cardCapacity.textContent = cardItem.offer.rooms + ' комнаты для ' + cardItem.offer.guests + ' гостей';
+  cardTime.textContent = 'Заезд после ' + cardItem.offer.checkin + ', выезд до ' + cardItem.offer.checkout;
+  cardDescription.textContent = cardItem.offer.description;
+
+  fillFeaturesList(cardFeatures, cardItem.offer.features);
+
+  fillPhotoList(cardPhotos, cardItem.offer.photos);
+
+  return singleCard;
+};
+
+// отрисовка карточки
+
+var renderCard = function (template, siblingNext) {
+  map.insertBefore(template, siblingNext);
+};
+
+renderCard(fillCard(items[0]), siblingMapElement);
