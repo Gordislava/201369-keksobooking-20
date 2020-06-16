@@ -1,8 +1,12 @@
 'use strict';
-// eslint-disable-next-line strict
+
 var AMOUNT_ITEMS = 8;
 var PIN_WIDTN = 50;
 var PIN_HEIGHT = 70;
+var MAIN_PIN_WIDTH = 65;
+var MAIN_PIN_HEIGHT = 65;
+var MAIN_PIN_TIP_HEIGHT = 22;
+var MAIN_PIN_TIP_WIDTH = 10;
 var REGISTRATION_TIME = ['12:00', '13:00', '14:00'];
 var TITLES = [
   'Выгодное предложение',
@@ -68,12 +72,11 @@ var locationLimitsX = {
 };
 
 var map = document.querySelector('.map');
-map.classList.remove('map--faded');
+// map.classList.remove('map--faded');
 var templatePin = document.querySelector('#pin').content.querySelector('.map__pin');
 var templateCard = document.querySelector('#card').content.querySelector('.map__card');
 var siblingMapElement = document.querySelector('.map__filters-container');
-
-var getRandomInt = function (min, max) {
+var getRandomInt = function (min, max) {map.
   min = Math.ceil(min);
   max = Math.floor(max);
   return Math.floor(Math.random() * (max - min + 1)) + min;
@@ -172,7 +175,8 @@ var renderPins = function () {
   return pin;
 };
 
-renderPins();
+// перенести отрисовку объявлений в функцию активации карты
+// renderPins();
 
 
 // создание шаблона для фотографии
@@ -263,4 +267,117 @@ var renderCard = function (template, siblingNext) {
   map.insertBefore(template, siblingNext);
 };
 
-renderCard(fillCard(items[0]), siblingMapElement);
+// вызов заккоментирован до лучших времен
+// renderCard(fillCard(items[0]), siblingMapElement);
+
+
+// блокировка форм на странице
+var disabledElement = function (element) {
+  element.setAttribute('disabled', 'true');
+};
+
+var disabledMultipleElement = function (arrayElements) {
+  for (var i = 0; i < arrayElements.length; i++) {
+    disabledElement(arrayElements[i]);
+  }
+  return arrayElements;
+};
+
+var filterSelects = document.querySelectorAll('select');
+var formFieldsets = document.querySelectorAll('fieldset');
+
+
+var mainPin = document.querySelector('.map__pin--main');
+var mainForm = document.querySelector('.ad-form');
+var addressInput = document.querySelector('#address');
+
+
+var selectRoom = document.querySelector('#room_number');
+var selectCapacity = document.querySelector('#capacity');
+
+var activatedForm = function (arrayElements) {
+  for (var i = 0; i < arrayElements.length; i++) {
+    arrayElements[i].removeAttribute('disabled');
+  }
+};
+
+// поиск координат центра метки
+var setMainPinAddressInactive = function () {
+  var locationX = Math.round(MAIN_PIN_WIDTH / 2 + mainPin.offsetLeft);
+  var locationY = Math.round(MAIN_PIN_HEIGHT / 2 + mainPin.offsetTop);
+  addressInput.value = locationX + ', ' + locationY;
+
+};
+
+// поиск координат кончика метки
+var setMainPinAddress = function () {
+  var locationX = Math.round(MAIN_PIN_WIDTH / 2 + mainPin.offsetLeft + (MAIN_PIN_TIP_WIDTH / 2));
+  var locationY = Math.round(MAIN_PIN_HEIGHT + mainPin.offsetTop + MAIN_PIN_TIP_HEIGHT);
+  addressInput.value = locationX + ', ' + locationY;
+
+};
+
+// блокировка выбора кол-ва гостей на старте
+var disabledCapasityOptions = function (array) {
+  for (var i = 0; i < array.length; i++) {
+    array[i].setAttribute('disabled', 'true');
+  }
+};
+
+// блокировка страницы на старте
+var isPageInactive = function () {
+  disabledMultipleElement(filterSelects);
+  disabledMultipleElement(formFieldsets);
+  setMainPinAddressInactive();
+};
+
+isPageInactive();
+
+// разблокирование страницы
+
+var startActiveState = function () {
+  map.classList.remove('map--faded');
+  mainForm.classList.remove('ad-form--disabled');
+  renderPins();
+  activatedForm(filterSelects);
+  activatedForm(formFieldsets);
+  setMainPinAddress();
+  renderCard(fillCard(items[0]), siblingMapElement);
+  disabledCapasityOptions(selectCapacity);
+};
+
+
+// ограничение диапазона выбора кол-ва гостей при смене комнат
+var setCapasityOptions = function () {
+  if (selectRoom.options.selectedIndex === 1) {
+    selectCapacity.options[2].disabled = false;
+    selectCapacity.options[1].disabled = false;
+    selectCapacity.options[0].disabled = true;
+    selectCapacity.options[3].disabled = true;
+  } else if (selectRoom.options.selectedIndex === 2) {
+    selectCapacity.options[2].disabled = false;
+    selectCapacity.options[1].disabled = false;
+    selectCapacity.options[0].disabled = false;
+    selectCapacity.options[3].disabled = true;
+  } else if (selectRoom.options.selectedIndex === 3) {
+    selectCapacity.options[3].disabled = false;
+    selectCapacity.options[2].disabled = true;
+    selectCapacity.options[1].disabled = true;
+    selectCapacity.options[0].disabled = true;
+  } else if (selectRoom.options.selectedIndex === 0) {
+    selectCapacity.options[3].disabled = true;
+    selectCapacity.options[2].disabled = false;
+    selectCapacity.options[1].disabled = true;
+    selectCapacity.options[0].disabled = true;
+  }
+};
+
+
+mainPin.addEventListener('mousedown', startActiveState);
+mainPin.addEventListener('keydown', function (evt) {
+  if (evt.key === 'Enter') {
+    startActiveState();
+  }
+});
+selectRoom.addEventListener('change', setCapasityOptions);
+
