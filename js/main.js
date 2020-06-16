@@ -76,7 +76,8 @@ var map = document.querySelector('.map');
 var templatePin = document.querySelector('#pin').content.querySelector('.map__pin');
 var templateCard = document.querySelector('#card').content.querySelector('.map__card');
 var siblingMapElement = document.querySelector('.map__filters-container');
-var getRandomInt = function (min, max) {map.
+var getRandomInt = function (min, max) {
+  map.
   min = Math.ceil(min);
   max = Math.floor(max);
   return Math.floor(Math.random() * (max - min + 1)) + min;
