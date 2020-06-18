@@ -268,9 +268,6 @@ var renderCard = function (template, siblingNext) {
   map.insertBefore(template, siblingNext);
 };
 
-// вызов заккоментирован до лучших времен
-// renderCard(fillCard(items[0]), siblingMapElement);
-
 
 // блокировка форм на странице
 var disabledElement = function (element) {
